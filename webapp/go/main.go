@@ -315,40 +315,46 @@ func initialize(c echo.Context) error {
 	loop := 2
 	sig := make(chan int, loop)
 	go func() {
-	for _, p := range paths {
-		sqlFile, _ := filepath.Abs(p)
-		cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
-			mySQLConnectionData.Host,
-			mySQLConnectionData.User,
-			mySQLConnectionData.Password,
-			mySQLConnectionData.Port,
-			mySQLConnectionData.DBName,
-			sqlFile,
-		)
-		if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
-			c.Logger().Errorf("Initialize script error : %v", err)
-			// return c.NoContent(http.StatusInternalServerError)
+		for i, p := range paths {
+			if i == 1 {
+				continue;
+			}
+			sqlFile, _ := filepath.Abs(p)
+			cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
+				mySQLConnectionData.Host,
+				mySQLConnectionData.User,
+				mySQLConnectionData.Password,
+				mySQLConnectionData.Port,
+				mySQLConnectionData.DBName,
+				sqlFile,
+			)
+			if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
+				c.Logger().Errorf("Initialize script error : %v", err)
+				// return c.NoContent(http.StatusInternalServerError)
+			}
 		}
-	}
-	sig <- 1
+		sig <- 1
 	}()
 	go func() {
-	for _, p := range paths {
-		sqlFile, _ := filepath.Abs(p)
-		cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
-			mySQLConnectionData2.Host,
-			mySQLConnectionData2.User,
-			mySQLConnectionData2.Password,
-			mySQLConnectionData2.Port,
-			mySQLConnectionData2.DBName,
-			sqlFile,
-		)
-		if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
-			c.Logger().Errorf("Initialize script error : %v", err)
-			// return c.NoContent(http.StatusInternalServerError)
+		for i, p := range paths {
+			if i == 2 {
+				continue;
+			}
+			sqlFile, _ := filepath.Abs(p)
+			cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
+				mySQLConnectionData2.Host,
+				mySQLConnectionData2.User,
+				mySQLConnectionData2.Password,
+				mySQLConnectionData2.Port,
+				mySQLConnectionData2.DBName,
+				sqlFile,
+			)
+			if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
+				c.Logger().Errorf("Initialize script error : %v", err)
+				// return c.NoContent(http.StatusInternalServerError)
+			}
 		}
-	}
-	sig <- 1
+		sig <- 1
 	}()
 	for {
 	if len(sig) == 2 {
