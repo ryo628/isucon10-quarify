@@ -591,7 +591,7 @@ func getChairSearchCondition(c echo.Context) error {
 
 func getLowPricedChair(c echo.Context) error {
 	var chairs []Chair
-	query := `SELECT * FROM (SELECT * FROM chair WHERE stock > 0  LIMIT ?) as ch ORDER BY price ASC, id ASC`
+	query := `SELECT * FROM chair WHERE stock > 0 ORDER BY price ASC, id ASC LIMIT ?`
 	err := db.Select(&chairs, query, Limit)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -840,7 +840,7 @@ func searchRecommendedEstateWithChair(c echo.Context) error {
 	w := chair.Width
 	h := chair.Height
 	d := chair.Depth
-	query = `SELECT * FROM (SELECT * FROM estate WHERE (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?)) as ch ORDER BY popularity DESC, id ASC`
+	query = `SELECT * FROM estate WHERE (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) OR (door_width >= ? AND door_height >= ?) ORDER BY popularity DESC, id ASC LIMIT ?`
 	err = db.Select(&estates, query, w, h, w, d, h, w, h, d, d, w, d, h, Limit)
 	if err != nil {
 		if err == sql.ErrNoRows {
