@@ -38,6 +38,6 @@ CREATE TABLE isuumo.chair
     popularity  INTEGER         NOT NULL,
     stock       INTEGER         NOT NULL,
     INDEX (price),
-    INDEX (rent ASC, id ASC)
+    INDEX (price ASC, id ASC)
 );
 
