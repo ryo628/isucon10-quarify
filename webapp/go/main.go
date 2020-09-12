@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	echopprof "github.com/sevenNt/echo-pprof"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -270,6 +271,8 @@ func main() {
 	e.POST("/api/estate/nazotte", searchEstateNazotte)
 	e.GET("/api/estate/search/condition", getEstateSearchCondition)
 	e.GET("/api/recommended_estate/:id", searchRecommendedEstateWithChair)
+
+	echopprof.Wrap(e)
 
 	mySQLConnectionData = NewMySQLConnectionEnv()
 
