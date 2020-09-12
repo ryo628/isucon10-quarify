@@ -1,4 +1,4 @@
-PPROF:=go tool pprof -png -output pprof.png http://localhost:6060/debug/pprof/profile
+PPROF:=go tool pprof -png -output pprof.png http://localhost:8000/debug/pprof/profile
 SLACKCAT:=slackcat --tee --channel isucon10
 SLACKRAW:=slackcat --channel isucon10
 NGX_LOG:=/var/log/nginx/access.log
@@ -20,7 +20,7 @@ before:
 install-essentials: ## install essentials
 	sudo apt update
 	sudo apt upgrade -y
-	sudo apt install -y vim git-core htop dstat unzip graphviz
+	sudo apt install -y vim git-core htop dstat unzip
 	# make zsh-init
 	# make redis-init
 	# make alp-init
@@ -82,8 +82,7 @@ golang-1.9: ## install gokang-1.9
 	sudo apt install -y golang-go
 
 pprof:
-	$(PPROF)
-	$(SLACKRAW) -n pprof.png ./pprof.png
+	$(PPROF) && $(SLACKRAW) -n pprof.png ./pprof.png
 
 slackcat-init:
 	wget https://github.com/bcicen/slackcat/releases/download/v1.5/slackcat-1.5-linux-amd64 -O slackcat
@@ -93,3 +92,6 @@ slackcat-init:
 
 kataribe:
 	sudo cat $(NGX_LOG) | kataribe -f ./kataribe.toml | $(SLACKCAT)
+
+pt-query-digest:
+	sudo pt-query-digest --limit 10 /var/log/mysql/slow.log | $(SLACKCAT)
