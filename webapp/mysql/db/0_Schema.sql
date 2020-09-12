@@ -41,3 +41,8 @@ CREATE TABLE isuumo.chair
     INDEX (rent ASC, id ASC)
 );
 
+-- CREATE TABLE isuumo.chairsoldout
+-- {
+--     id INTEGER NOT NULL PRIMARY KEY,
+-- };
+
