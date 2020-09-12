@@ -20,11 +20,11 @@ before:
 install-essentials: ## install essentials
 	sudo apt update
 	sudo apt upgrade -y
-	sudo apt install -y vim git-core htop dstat unzip
+	sudo apt install -y vim git-core htop dstat unzip graphviz
 	# make zsh-init
 	# make redis-init
 	# make alp-init
-	make perconia-init
+	# make perconia-init
 	# make scripts-dl
 
 ssh_key_add:
