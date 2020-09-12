@@ -1,4 +1,4 @@
-PPROF:=go tool pprof -png -output pprof.png http://localhost:8000/debug/pprof/profile
+PPROF:=go tool pprof -png -output pprof.png http://localhost:1234/debug/pprof/profile
 SLACKCAT:=slackcat --tee --channel isucon10
 SLACKRAW:=slackcat --channel isucon10
 NGX_LOG:=/var/log/nginx/access.log
