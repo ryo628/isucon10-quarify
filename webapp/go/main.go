@@ -312,30 +312,49 @@ func initialize(c echo.Context) error {
 		filepath.Join(sqlDir, "2_DummyChairData.sql"),
 	}
 
-	var wg sync.WaitGroup
-	caller := func(data *MySQLConnectionEnv) {
-		defer wg.Done()
-		for _, p := range paths {
-			sqlFile, _ := filepath.Abs(p)
-			cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
-				data.Host,
-				data.User,
-				data.Password,
-				data.Port,
-				data.DBName,
-				sqlFile,
-			)
-			if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
-				c.Logger().Errorf("Initialize script error : %v", err)
-				//return c.NoContent(http.StatusInternalServerError)
-			}
+	loop := 2
+	sig := make(chan int, loop)
+	go func() {
+	for _, p := range paths {
+		sqlFile, _ := filepath.Abs(p)
+		cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
+			mySQLConnectionData.Host,
+			mySQLConnectionData.User,
+			mySQLConnectionData.Password,
+			mySQLConnectionData.Port,
+			mySQLConnectionData.DBName,
+			sqlFile,
+		)
+		if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
+			c.Logger().Errorf("Initialize script error : %v", err)
+			// return c.NoContent(http.StatusInternalServerError)
 		}
 	}
-	wg.Add(1)
-	caller(mySQLConnectionData)
-	wg.Add(1)
-	caller(mySQLConnectionData2)
-    wg.Wait()
+	sig <- 1
+	}()
+	go func() {
+	for _, p := range paths {
+		sqlFile, _ := filepath.Abs(p)
+		cmdStr := fmt.Sprintf("mysql -h %v -u %v -p%v -P %v %v < %v",
+			mySQLConnectionData2.Host,
+			mySQLConnectionData2.User,
+			mySQLConnectionData2.Password,
+			mySQLConnectionData2.Port,
+			mySQLConnectionData2.DBName,
+			sqlFile,
+		)
+		if err := exec.Command("bash", "-c", cmdStr).Run(); err != nil {
+			c.Logger().Errorf("Initialize script error : %v", err)
+			// return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+	sig <- 1
+	}()
+	for {
+	if len(sig) == 2 {
+		break
+	}
+	}
 
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "go",
