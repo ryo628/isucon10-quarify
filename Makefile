@@ -15,7 +15,7 @@ before:
 		sudo mv -f $(MYSQL_LOG) ~/logs/$(when)/ ; \
 	fi
 	sudo systemctl restart nginx
-	 sudo systemctl restart mysql
+	sudo systemctl restart mysql
 
 install-essentials: ## install essentials
 	sudo apt update
