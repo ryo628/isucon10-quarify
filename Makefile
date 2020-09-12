@@ -2,7 +2,7 @@ PPROF:=go tool pprof -png -output pprof.png http://localhost:1323/debug/pprof/pr
 SLACKCAT:=slackcat --tee --channel isucon10
 SLACKRAW:=slackcat --channel isucon10
 NGX_LOG:=/var/log/nginx/access.log
-MYSQL_LOG:=/tmp/slow-query.log
+MYSQL_LOG:=/var/log/mysql/slow.log
 KATARU_CFG:=./kataribe.toml
 
 before:
