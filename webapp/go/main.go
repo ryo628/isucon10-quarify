@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	echopprof "github.com/sevenNt/echo-pprof"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -254,7 +253,7 @@ func main() {
 	// e.Logger.SetLevel(log.OFF)
 
 	// Middleware
-	// e.Use(middleware.Logger())
+	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	// Initialize
@@ -278,7 +277,7 @@ func main() {
 	e.GET("/api/estate/search/condition", getEstateSearchCondition)
 	e.GET("/api/recommended_estate/:id", searchRecommendedEstateWithChair)
 
-	echopprof.Wrap(e)
+	// echopprof.Wrap(e)
 
 	mySQLConnectionData = NewMySQLConnectionEnv()
 
