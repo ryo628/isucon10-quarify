@@ -33,6 +33,10 @@ type InitializeResponse struct {
 	Language string `json:"language"`
 }
 
+type ChairSoldOut struct {
+	ID int64 `db:"id" json:"id"`
+}
+
 type Chair struct {
 	ID          int64  `db:"id" json:"id"`
 	Name        string `db:"name" json:"name"`
@@ -334,9 +338,6 @@ func getChairDetail(c echo.Context) error {
 		}
 		c.Echo().Logger.Errorf("Failed to get the chair from id : %v", err)
 		return c.NoContent(http.StatusInternalServerError)
-	} else if chair.Stock <= 0 {
-		c.Echo().Logger.Infof("requested id's chair is sold out : %v", id)
-		return c.NoContent(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, chair)
@@ -561,7 +562,7 @@ func buyChair(c echo.Context) error {
 	defer tx.Rollback()
 
 	var chair Chair
-	err = tx.QueryRowx("SELECT * FROM chair WHERE id = ? AND stock > 0 FOR UPDATE", id).StructScan(&chair)
+	err = tx.QueryRowx("SELECT * FROM chair WHERE id = ? FOR UPDATE", id).StructScan(&chair)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.Echo().Logger.Infof("buyChair chair id \"%v\" not found", id)
@@ -572,6 +573,10 @@ func buyChair(c echo.Context) error {
 	}
 
 	_, err = tx.Exec("UPDATE chair SET stock = stock - 1 WHERE id = ?", id)
+	if chair.Stock <= 1 {
+		_, err = tx.Exec("DELETE FROM chair WHERE id = ?", id)
+		// _, err = tx.Exec("INSERT INTO chairsoldout(id) VALUES (?)", id)
+	}
 	if err != nil {
 		c.Echo().Logger.Errorf("chair stock update failed : %v", err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -592,7 +597,7 @@ func getChairSearchCondition(c echo.Context) error {
 
 func getLowPricedChair(c echo.Context) error {
 	var chairs []Chair
-	query := `SELECT * FROM chair WHERE stock > 0 ORDER BY price ASC, id ASC LIMIT ?`
+	query := `SELECT * FROM chair ORDER BY price ASC, id ASC LIMIT ?`
 	err := db.Select(&chairs, query, Limit)
 	if err != nil {
 		if err == sql.ErrNoRows {
