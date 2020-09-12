@@ -23,6 +23,7 @@ import (
 
 const Limit = 20
 const NazotteLimit = 50
+const DBconNum = 200
 
 var db *sqlx.DB
 var db2 *sqlx.DB
@@ -286,7 +287,7 @@ func main() {
 	if err != nil {
 		e.Logger.Fatalf("DB connection failed : %v", err)
 	}
-	db.SetMaxOpenConns(500)
+	db.SetMaxOpenConns(DBconNum)
 	defer db.Close()
 
 	mySQLConnectionData2 = NewMySQLConnectionEnv()
@@ -295,7 +296,7 @@ func main() {
 	if err != nil {
 		e.Logger.Fatalf("DB connection failed : %v", err)
 	}
-	db2.SetMaxOpenConns(500)
+	db2.SetMaxOpenConns(DBconNum)
 	defer db2.Close()
 
 	// Start server
