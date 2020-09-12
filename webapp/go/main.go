@@ -618,10 +618,11 @@ func buyChair(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	_, err = tx.Exec("UPDATE chair SET stock = stock - 1 WHERE id = ?", id)
 	if chair.Stock <= 1 {
 		_, err = tx.Exec("DELETE FROM chair WHERE id = ?", id)
 		// _, err = tx.Exec("INSERT INTO chairsoldout(id) VALUES (?)", id)
+	} else {
+		_, err = tx.Exec("UPDATE chair SET stock = stock - 1 WHERE id = ?", id)
 	}
 	if err != nil {
 		c.Echo().Logger.Errorf("chair stock update failed : %v", err)
