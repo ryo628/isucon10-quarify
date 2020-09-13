@@ -8,12 +8,8 @@ KATARU_CFG:=./kataribe.toml
 before:
 	$(eval when := $(shell date "+%s"))
 	mkdir -p ~/logs/$(when)
-	@if [ -f $(NGX_LOG) ]; then \
-		sudo mv -f $(NGX_LOG) ~/logs/$(when)/ ; \
-	fi
-	@if [ -f $(MYSQL_LOG) ]; then \
-		sudo mv -f $(MYSQL_LOG) ~/logs/$(when)/ ; \
-	fi
+	@sudo perl -wE 'use File::Copy "move"; if(-f "$(MYSQL_LOG)"){say "move $(MYSQL_LOG) to ~/logs/$(when)/"; move "$(MYSQL_LOG)", $$ENV{"HOME"}."/logs/$(when)/" or die "$(MYSQL_LOG) move failed"}else{say "$(MYSQL_LOG) not found: do nothing"}'
+	@sudo perl -wE 'use File::Copy "move"; if(-f "$(NGX_LOG)"){say "move $(NGX_LOG) to ~/logs/$(when)/"; move "$(NGX_LOG)", $$ENV{"HOME"}."/logs/$(when)/" or die "$(NGX_LOG) move failed"}else{say "$(NGX_LOG) not found: do nothing"}'
 	sudo systemctl restart nginx
 	sudo systemctl restart mysql
 
@@ -23,9 +19,12 @@ install-essentials: ## install essentials
 	sudo apt install -y vim git-core htop dstat unzip graphviz
 	# make zsh-init
 	# make redis-init
-	# make alp-init
-	# make perconia-init
 	# make scripts-dl
+	# make ssh_key_add
+	# make alp-init
+	make perconia-init
+	make kataribe-init
+	make slackcat-init
 
 ssh_key_add:
 	echo "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAl5qzkPWiUc3vJloG3jB8GOzT2j9m19oJeZmwwvRYgP1Y+aXqcoeOD8b/j+dj0KxXKxw5KnK9E3BapdnyMkQkMnSpob3EZ/4Tuc2QPrNxHtDQGk5Dp52IbRXuu3JvEyoLmeVbLlpurPOCLIZ4kae9YjX/zpTFT4zoaq2Gp+b/uAlq4iUfGq7IF8Hz6qlO62dexLzHgdkq0wSuq4H+eY3pzcceIG8Wo/ts0rHXOqLmOeZBb/Cx8tJ8zQvJBT71ka1mPTUO7fGruvYNcTBWwn86cAJhFtqLYVwr4baMsDf5QyP1B8xexTYpUzhgPT4mmQHRuH62+XMr6f5FDk7Vk0Bt8w== saggggo" >> .ssh/authorized_keys
@@ -53,7 +52,7 @@ h2o-init: ## install H2O web server from source
 	sudo sh -c "cd /usr/local/src && rm -rf ./h20 && git clone https://github.com/h2o/h2o.git && cd h2o && git checkout 2a75d26b00fcded91688faadf4313378a1432296 && cmake -DWITH_BUNDLED_SSL=on . && make && make install && mkdir -p /etc/h2o && cp examples/h2o/* /etc/h2o && wget https://gist.github.com/plainbanana/5d0f8b22545b17ce5aabdf053050fa67/raw/c51cbe21b52dd8e3ae50ec4dec361dd129a0c3fd/h2o.service -P /etc/systemd/system/ && systemctl enable h2o && systemctl start h2o "
 
 perconia-init: ## install perconia-toolkit for SQL slowlog
-	sudo sh -c "cd /usr/local/src && wget https://www.percona.com/downloads/percona-toolkit/3.2.0/binary/debian/bionic/x86_64/percona-toolkit_3.2.0-1.bionic_amd64.deb && sudo apt update && sudo apt install -y gdebi && sudo gdebi percona-toolkit_3.2.0-1.bionic_amd64.deb"
+	sudo sh -c "cd /usr/local/src && wget https://www.percona.com/downloads/percona-toolkit/3.2.0/binary/debian/bionic/x86_64/percona-toolkit_3.2.0-1.bionic_amd64.deb && sudo apt update && sudo apt install -y gdebi && yes | sudo gdebi percona-toolkit_3.2.0-1.bionic_amd64.deb"
 	sudo sh -c "mkdir -p /var/log/mysql && chown mysql:mysql /var/log/mysql && sudo chmod 700 /var/log/mysql"
 
 scripts-dl: ## download useful scripts
