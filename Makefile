@@ -94,4 +94,4 @@ kataribe:
 	sudo cat $(NGX_LOG) | kataribe -f ./kataribe.toml | $(SLACKCAT)
 
 pt-query-digest:
-	sudo pt-query-digest --limit 10 /var/log/mysql/slow.log | $(SLACKCAT)
+	sudo pt-query-digest --limit 10 /var/log/mysql/slow.log | cut -b 1-320 | $(SLACKCAT)
