@@ -8,12 +8,8 @@ KATARU_CFG:=./kataribe.toml
 before:
 	$(eval when := $(shell date "+%s"))
 	mkdir -p ~/logs/$(when)
-	@if [ -f $(NGX_LOG) ]; then \
-		sudo mv -f $(NGX_LOG) ~/logs/$(when)/ ; \
-	fi
-	@if [ -f $(MYSQL_LOG) ]; then \
-		sudo mv -f $(MYSQL_LOG) ~/logs/$(when)/ ; \
-	fi
+	@sudo perl -wE 'use File::Copy "move"; if(-f "$(MYSQL_LOG)"){say "move $(MYSQL_LOG) to ~/logs/$(when)/"; move "$(MYSQL_LOG)", $$ENV{"HOME"}."/logs/$(when)/" or die "$(MYSQL_LOG) move failed"}else{say "$(MYSQL_LOG) not found: do nothing"}'
+	@sudo perl -wE 'use File::Copy "move"; if(-f "$(NGX_LOG)"){say "move $(NGX_LOG) to ~/logs/$(when)/"; move "$(NGX_LOG)", $$ENV{"HOME"}."/logs/$(when)/" or die "$(NGX_LOG) move failed"}else{say "$(NGX_LOG) not found: do nothing"}'
 	sudo systemctl restart nginx
 	sudo systemctl restart mysql
 
